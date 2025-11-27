@@ -16,7 +16,7 @@ int main() {
     d = b * b - 4 * a * c;
 
     // 1 reelle Lösung
-    if (d == 0.0)
+    if (d < 1e-8)
         printf("Die doppelte Nullstelle lautet %.2lf.\n", -b / (2 * a));
 
     // 2 reelle Lösungen
