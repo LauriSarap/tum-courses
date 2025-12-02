@@ -1,0 +1,239 @@
+MCU = atmega1284p
+
+TARGET = p
+
+# ########## C compiler flags ###########
+
+
+# -D: defines
+# -U: undefines
+# -I: include directories
+
+# Debugging format
+CFLAGS = -gdwarf-2
+
+# optimization[0, 1, 2, 3, s]
+CFLAGS += -Os
+
+# treat char as unsigned char
+CFLAGS += -funsigned-char
+
+# bitfields are unsigned
+CFLAGS += -funsigned-bitfields
+
+# no holes in structures (alignment)
+# CFLAGS += -fpack-struct 
+
+# keep enums as small as possible
+CFLAGS += -fshort-enums
+
+# enable all warnings
+CFLAGS += -Wall
+
+# warn when function declaration do not specify types
+CFLAGS += -Wstrict-prototypes
+
+# choose gnu17 standard
+CFLAGS += -std=gnu11# -std=gnu17# gnu99 # c89, gnu89, c99, gnu99
+
+CFLAGS += -Wa,-adhlns=$(<:.c=.lst)	# Options passed to assembler
+									# -a[cdghilmns]: turn on listings in a specific way
+									# d: omit debugging directives
+									# h: include high-level source
+									# l: include assembly
+									# n: omit forms processing
+									# s: include symbols
+									# =file: set name of listings file
+
+
+
+
+# Compiler flags to generate dependency files.
+### GENDEPFLAGS = -Wp,-M,-MP,-MT,$(*F).o,-MF,.dep/$(@F).d
+# GENDEPFLAGS = -MD -MP -MF .dep/$(@F).d
+
+# Combine all necessary flags and optional flags.
+# Add target processor to flags.
+# ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS) $(GENDEPFLAGS)
+ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS)
+ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
+
+
+# ########## Ende C Compiler flags ##########
+
+
+
+# ########## Linker flags ##########
+
+MATH_LIB = -lm
+
+# External memory options
+
+# 64 KB of external RAM, starting after internal RAM (ATmega128!),
+# used for variables (.data/.bss) and heap (malloc()).
+#EXTMEMOPTS = -Wl,-Tdata=0x801100,--defsym=__heap_end=0x80ffff
+
+# 64 KB of external RAM, starting after internal RAM (ATmega128!),
+# only used for heap (malloc()).
+#EXTMEMOPTS = -Wl,--defsym=__heap_start=0x801100,--defsym=__heap_end=0x80ffff
+
+EXTMEMOPTS =
+
+
+# Options passed to the linker
+# -Map=mapfilfe; Datei, in welche Mapping-Info geschrieben wird
+# --cref: Cross reference table is printed to the mapfile
+LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
+LDFLAGS += $(MATH_LIB) $(PRINTF_LIB) $(SCANF_LIB) $(LINK_FLAGS)
+LDFLAGS += $(EXTMEMOPTS)
+
+
+# ########## Ende Linker flags ##########
+
+
+
+# Define all object files.
+OBJ = $(CSRC:.c=.o) $(ASRC:.S=.o)
+
+
+
+#.PHONY: all elf hex eep clean show fuses
+.PHONY: all elf clean show fuses
+
+.SECONDARY : $(TARGET).elf
+.PRECIOUS : $(OBJ)
+
+
+all: elf 
+
+# hex eep
+
+
+
+# ########## create elf file ##########
+
+# # build the target "elf" by building the file $(TARGET).elf
+elf: $(TARGET).elf
+
+
+# build the elf file from the object files (= linking)
+%.elf: $(OBJ)
+	@echo
+	@echo Linking: $@
+	avr-gcc $(ALL_CFLAGS) $(OBJ)  $(LDFLAGS) --output $@
+
+
+# build object files from c source files
+%.o: %.c
+	@echo
+	@echo Compiling: $<
+	avr-gcc -c $(ALL_CFLAGS) $< -o $@
+
+
+%.o: %.S
+	@echo
+	@echo Building object file from assembly file: $<
+
+
+
+
+
+# ########## create intel hex file ##########
+
+# # build the target "hex" by building the file $(TARGET).hex
+hex: $(TARGET).hex
+
+# build the hex file from the elf file; omit the .eeprom section
+%.hex: %.elf
+	@echo
+	@echo Creating hex file
+	avr-objcopy -O ihex -R .eeprom $< $@
+
+
+
+
+
+
+# ########## create the eeprom file ##########
+
+# build the target "eep" by building the File $(TARGET).eep;
+# this file holds the data to be stored in the .eeprom section
+eep: $(TARGET).eep
+
+# build the file that contains eprom data; source is elf file
+# the minus sign makes make ignore any errors
+# -j .eeprom: only section .eeprom
+%.eep: %.elf
+	@echo
+	@echo Creating eeprom file
+	-avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" \
+	--change-section-lma .eeprom=0 -O ihex $< $@
+
+
+# ########## Note ##########
+#
+# From avrdude version 8 on, "-c atmelice_jtag" can be used to 
+# explicitly specify the jtag interface
+#
+# "-c atmelice_jtag" is not supported by avrdude 7.1, which is currently 
+# installed in the eikon labs in /usr/bin/avrdude
+# 
+# 24 Nov. 2025:
+#
+# avrdude 8.1 has been installed at the eikon labs in path
+# /nas/ei/share/tools/gcc/avrdude/latest/bin/avrdude
+# 
+# Link /usr/local/bin/avrdude8 points to this version on test device only
+# will be rolled out to all eikon computers
+#
+# Then, call "avrdude" in this makefile may be changed to 
+# "usr/local/bin/avrdude8" to link to the latest version 8.1 
+# and support atmelice_jtag
+
+
+
+# ########## program the mcu ##########
+program: $(TARGET).elf
+	@echo
+	@echo Copying $(TARGET).elf to $(MCU)
+	avrdude -p $(MCU) -P usb -c atmelice -V -U flash:w:$(TARGET).elf:e
+
+
+# ########## program solution to the mcu ##########
+programlsg: 
+	avrdude -p $(MCU) -P usb -c atmelice -V -U flash:w:s.elf:e
+
+
+# ######### show disassembly ########
+show: $(TARGET).elf
+	avr-objdump -h -S $(TARGET).elf
+
+
+# ######### program fuses #############
+fuses:
+	# 20 MHz, external crystal, cf. http://www.engbedded.com/fusecalc/
+	avrdude -p atmega1284p -P usb -c atmelice -U lfuse:w:0xf7:m -U hfuse:w:0x99:m -U efuse:w:0xff:m
+
+
+# ########## delete files ##########
+clean:
+	@echo 
+	rm -f $(TARGET).elf *.o *.map *.lst *.hex *.eep
+
+
+
+# # ########## delete files ##########
+# clean:
+# 	rm -f $(TARGET).elf &> /dev/null
+# 	rm -f $(TARGET).o &> /dev/null
+# 	rm -f $(TARGET).map &> /dev/null
+# 	rm -f $(TARGET).lst &> /dev/null
+# 	rm -f $(OBJ) &> /dev/null
+# 	rm -f $(TARGET).hex &> /dev/null
+# 	rm -f $(TARGET).eep &> /dev/null
+
+
+
+
+
+
