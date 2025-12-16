@@ -1,0 +1,250 @@
+/*
+ * AVR Simulator Test File
+ * 
+ * This file tests all functionality needed for exercises 1-4.
+ * Uncomment the test you want to run!
+ * 
+ * Hover over DDRD, PORTD, PIND etc. for documentation!
+ */
+
+#include <avr/io.h>
+
+/* ============================================================================
+ * TEST 1: LED ON (Exercise 01)
+ * 
+ * Expected: LED should be ON (green), DDRD=0x01, PORTD=0x01
+ * ============================================================================
+ */
+#define TEST_LED_ON
+
+/* ============================================================================
+ * TEST 2: LED OFF
+ * ============================================================================
+ */
+//#define TEST_LED_OFF
+
+/* ============================================================================
+ * TEST 3: LED Blinking (Exercise 03)
+ * 
+ * Expected: LED blinks on/off automatically
+ * ============================================================================
+ */
+//#define TEST_LED_BLINK
+
+/* ============================================================================
+ * TEST 4: Button Polling (Exercise 04)
+ * 
+ * Expected: Press 'b' or SPACE to toggle LED
+ * ============================================================================
+ */
+//#define TEST_BUTTON_POLLING
+
+/* ============================================================================
+ * TEST 5: Data Types (Exercise 02)
+ * 
+ * Shows sizeof() for all types. Note differences between AVR and PC!
+ * LED will be OFF because int is 4 bytes on PC (2 bytes on AVR)
+ * ============================================================================
+ */
+//#define TEST_DATATYPES
+
+/* ============================================================================
+ * TEST 6: Bit Manipulation Demo
+ * 
+ * Shows different ways to manipulate bits (from the guide section 2.2)
+ * ============================================================================
+ */
+//#define TEST_BIT_MANIPULATION
+
+
+/* ========================================================================== */
+/*                              IMPLEMENTATIONS                               */
+/* ========================================================================== */
+
+#ifdef TEST_LED_ON
+/*
+ * Exercise 01: LED zum Leuchten bringen
+ * 
+ * The LED is connected to PD0 (Pin 14).
+ * To turn it on:
+ *   1. Configure PD0 as OUTPUT (DDRD bit 0 = 1)
+ *   2. Set PD0 to HIGH (PORTD bit 0 = 1)
+ */
+int main(void)
+{
+    // Set PD0 as output (bit 0 = 1)
+    // Binary: 0b00000001 = 0x01 = 1
+    DDRD = 1;
+    
+    // Drive PD0 high -> LED turns ON
+    PORTD = 1;
+    
+    // Keep running forever
+    while(1);
+}
+#endif
+
+
+#ifdef TEST_LED_OFF
+int main(void)
+{
+    DDRD = 1;       // PD0 as output
+    PORTD = 0;      // PD0 LOW -> LED OFF
+    while(1);
+}
+#endif
+
+
+#ifdef TEST_LED_BLINK
+/*
+ * Exercise 03: LED blinken lassen mit Schleife
+ * 
+ * Key concept: 'volatile' prevents the compiler from optimizing
+ * away the delay loop!
+ */
+#define MAX 5000  // Lower value for faster blinking in simulator
+
+int main(void)
+{
+    DDRD = 1;       // PD0 as output
+    PORTD = 0;      // Start OFF
+    
+    // MUST be volatile! Otherwise compiler removes the loop
+    volatile unsigned int i;
+    
+    while(1)
+    {
+        // Delay loop - just wastes time
+        for(i = 0; i < MAX; i++);
+        
+        // XOR toggles the bit:
+        // 0 XOR 1 = 1 (OFF -> ON)
+        // 1 XOR 1 = 0 (ON -> OFF)
+        PORTD ^= 1;
+    }
+}
+#endif
+
+
+#ifdef TEST_BUTTON_POLLING
+/*
+ * Exercise 04: Einlesen von Daten mittels "Polling"
+ * 
+ * Button on PD3 is "active low":
+ *   - Not pressed: PD3 = HIGH (1) due to pull-up
+ *   - Pressed: PD3 = LOW (0) because button connects to GND
+ * 
+ * We detect the "falling edge" (moment of press) to toggle LED.
+ */
+
+// Check if button pressed: PD3 (bit 3 = value 8) is LOW
+#define KEY_PRESSED ((PIND & 8) == 0)
+
+// LED control macros
+#define SET_LED_ON  (PORTD |= 1)        // OR to set bit
+#define SET_LED_OFF (PORTD &= ~1)       // AND with inverted mask to clear
+#define TOGGLE_LED  (PORTD ^= 1)        // XOR to toggle
+
+int main(void)
+{
+    // Must be volatile - it's modified in the loop
+    volatile unsigned char key_pressed_before = 0;
+    
+    DDRD = 1;       // PD0 output (LED), PD3 stays input (button)
+    SET_LED_ON;     // Start with LED on
+    
+    while(1)
+    {
+        // Falling edge detection: just pressed NOW
+        if (KEY_PRESSED && !key_pressed_before)
+        {
+            TOGGLE_LED;
+            key_pressed_before = 1;
+        }
+        
+        // Rising edge: button released
+        if (!KEY_PRESSED)
+            key_pressed_before = 0;
+    }
+}
+#endif
+
+
+#ifdef TEST_DATATYPES
+/*
+ * Exercise 02: Wortbreite der C-Datentypen
+ * 
+ * Real AVR sizes:
+ *   char:      1 byte (8 bit)
+ *   short:     2 bytes (16 bit)
+ *   int:       2 bytes (16 bit)  <-- NOTE: Different from PC!
+ *   long:      4 bytes (32 bit)
+ *   long long: 8 bytes (64 bit)
+ *   float:     4 bytes (32 bit)
+ *   double:    4 bytes (32 bit)  <-- Same as float on AVR!
+ * 
+ * PC sizes (what you'll see in simulator):
+ *   int:       4 bytes (32 bit)
+ *   double:    8 bytes (64 bit)
+ */
+
+// We'll use PORTD bits to show results
+// Look at the binary display at the bottom of the simulator!
+
+int main(void)
+{
+    DDRD = 0xFF;    // All pins as output so we can see values
+    
+    // The guide tests: if(sizeof(double) == 4) PORTD = 1;
+    // On AVR: double is 4 bytes -> LED ON
+    // On PC:  double is 8 bytes -> LED OFF
+    
+    if (sizeof(double) == 4)
+        PORTD = 1;  // Would be ON on real AVR
+    else
+        PORTD = 0;  // Will be OFF on PC
+    
+    // To see all sizes, you could encode them in PORTD:
+    // PORTD = sizeof(int);  // Shows 4 on PC, would show 2 on AVR
+    
+    while(1);
+}
+#endif
+
+
+#ifdef TEST_BIT_MANIPULATION
+/*
+ * Section 2.2: Bitweiser Zugriff auf Register
+ * 
+ * This demonstrates the different bit operations from the guide.
+ */
+int main(void)
+{
+    // a) Set PD5 as output, output HIGH
+    DDRD = 0x20;    // 0b00100000 - bit 5 set
+    PORTD = 0x20;   // Drive PD5 high
+    
+    // b) Set bit without changing others: use OR
+    DDRD |= 0x20;   // Set bit 5, keep others unchanged
+    
+    // c) Clear bit 3: use AND with inverted mask
+    DDRD &= 0xF7;   // 0xF7 = 0b11110111
+    
+    // d) Same thing using tilde operator (easier!)
+    DDRD &= ~8;     // ~8 = ~0b00001000 = 0b11110111
+    
+    // e) Toggle bit: use XOR
+    PORTD ^= 0x20;  // Toggle bit 5
+    
+    // For the LED on PD0:
+    // #define SET_LED_ON  (PORTD |= 1)
+    // #define SET_LED_OFF (PORTD &= ~1)
+    // #define TOGGLE_LED  (PORTD ^= 1)
+    
+    // Using _BV() macro (included in our simulator):
+    DDRD |= _BV(PD0);   // Same as DDRD |= 1;
+    PORTD |= _BV(PD0);  // Same as PORTD |= 1;
+    
+    while(1);
+}
+#endif

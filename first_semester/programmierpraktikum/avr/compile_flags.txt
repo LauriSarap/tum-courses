@@ -1,0 +1,5 @@
+-I
+simulator
+-Wall
+-std=c11
+
