@@ -35,7 +35,50 @@
  *   - int is typically 32 bit
  *   - double is typically 64 bit
  * 
- * Keep this in mind when testing sizeof() exercises!
+ * SOLUTION: Use AVR_STRICT_TYPES mode or the avr_* type aliases below.
+ *============================================================================*/
+
+/*============================================================================
+ * AVR-Compatible Type Aliases
+ * 
+ * Use these to get true AVR behavior in the simulator:
+ *   avr_int    = int16_t   (signed 16-bit,   -32768 to 32767)
+ *   avr_uint   = uint16_t  (unsigned 16-bit, 0 to 65535)
+ *   avr_long   = int32_t   (signed 32-bit)
+ *   avr_ulong  = uint32_t  (unsigned 32-bit)
+ *   avr_char   = int8_t    (signed 8-bit)
+ *   avr_uchar  = uint8_t   (unsigned 8-bit)
+ *============================================================================*/
+
+typedef int8_t   avr_char;
+typedef uint8_t  avr_uchar;
+typedef int16_t  avr_int;
+typedef uint16_t avr_uint;
+typedef int32_t  avr_long;
+typedef uint32_t avr_ulong;
+
+/*============================================================================
+ * How to Experience AVR Overflow Issues in the Simulator
+ * 
+ * To reproduce exercise 2.6 problems, replace standard types with AVR types:
+ * 
+ *   INSTEAD OF:                    USE:
+ *   volatile int i;                volatile avr_int i;
+ *   volatile unsigned int i;       volatile avr_uint i;
+ *   volatile long i;               volatile avr_long i;
+ *   volatile unsigned long i;      volatile avr_ulong i;
+ * 
+ * Example for exercise 2.6:
+ *   #define MAX 33000
+ *   volatile avr_int i;           // Will overflow! (max 32767)
+ *   for (i = 0; i < MAX; i++);    // Infinite loop - never reaches 33000
+ * 
+ *   volatile avr_uint i;          // Works up to 65535
+ *   for (i = 0; i < MAX; i++);    // This works!
+ * 
+ *   #define MAX 65536
+ *   volatile avr_uint i;          // Will overflow! (max 65535)  
+ *   for (i = 0; i < MAX; i++);    // Infinite loop - 65535+1 wraps to 0
  *============================================================================*/
 
 /*============================================================================
@@ -201,6 +244,37 @@ extern volatile uint8_t SREG;
 
 /** Clear bit in register */
 #define cbi(reg, bit) ((reg) &= ~(1 << (bit)))
+
+/*============================================================================
+ * Cycle-Accurate Simulation (Exercise 2.6h)
+ * 
+ * LIMITATION: There is NO way in standard C to intercept "i++" on a local
+ * variable and add type-specific delays. Your PC executes 16-bit and 32-bit 
+ * increments in the same time - the timing difference is a hardware property
+ * of the 8-bit AVR that cannot be simulated without changing code.
+ * 
+ * MINIMAL CODE CHANGE: Replace "i++" with "INC(i)" in your for loop:
+ * 
+ *   for (i = 0; i < MAX; INC(i));
+ * 
+ * INC() uses C11 _Generic to auto-detect avr_uint vs avr_ulong and adds
+ * proportional delays (32-bit is 2x slower, just like on real AVR).
+ *============================================================================*/
+
+/* Busy-wait to simulate AVR cycle cost */
+static inline void _avr_delay_16(void) {
+    for (volatile int j = 0; j < 80; j++) __asm__ volatile("");
+}
+static inline void _avr_delay_32(void) {
+    for (volatile int j = 0; j < 160; j++) __asm__ volatile("");  /* 2x slower */
+}
+
+/* Type-generic increment with AVR-accurate cycle delays */
+#define INC(x) (_Generic((x), \
+    avr_ulong:  (_avr_delay_32(), (x)++), \
+    avr_long:   (_avr_delay_32(), (x)++), \
+    default:    (_avr_delay_16(), (x)++) \
+))
 
 /*============================================================================
  * Simulator Internal - Main Function Renaming
