@@ -219,19 +219,24 @@ static void draw_registers(void) {
     /* Binary display for PORTD */
     y = 22;
     x = 42;
-    mvprintw(y, x, "PORTD: 7 6 5 4 3 2 1 0");
-    mvprintw(y + 1, x, "       %d %d %d %d %d %d %d %d", (PORTD >> 7) & 1, (PORTD >> 6) & 1,
+    mvprintw(y, x, "DDRD:  7 6 5 4 3 2 1 0");
+    mvprintw(y + 1, x, "       %d %d %d %d %d %d %d %d", (DDRD >> 7) & 1, (DDRD >> 6) & 1,
+             (DDRD >> 5) & 1, (DDRD >> 4) & 1, (DDRD >> 3) & 1, (DDRD >> 2) & 1,
+             (DDRD >> 1) & 1, (DDRD >> 0) & 1);
+
+    mvprintw(y + 2, x, "PORTD: 7 6 5 4 3 2 1 0");
+    mvprintw(y + 3, x, "       %d %d %d %d %d %d %d %d", (PORTD >> 7) & 1, (PORTD >> 6) & 1,
              (PORTD >> 5) & 1, (PORTD >> 4) & 1, (PORTD >> 3) & 1, (PORTD >> 2) & 1,
              (PORTD >> 1) & 1, (PORTD >> 0) & 1);
 
-    mvprintw(y + 2, x, "PIND:  7 6 5 4 3 2 1 0");
-    mvprintw(y + 3, x, "       %d %d %d %d %d %d %d %d", (PIND >> 7) & 1, (PIND >> 6) & 1,
+    mvprintw(y + 4, x, "PIND:  7 6 5 4 3 2 1 0");
+    mvprintw(y + 5, x, "       %d %d %d %d %d %d %d %d", (PIND >> 7) & 1, (PIND >> 6) & 1,
              (PIND >> 5) & 1, (PIND >> 4) & 1, (PIND >> 3) & 1, (PIND >> 2) & 1, (PIND >> 1) & 1,
              (PIND >> 0) & 1);
 }
 
 static void draw_help(void) {
-    int y = 27;
+    int y = 29;
 
     attron(A_DIM);
     mvprintw(y, 0, "------------------------------------------------------------------------");
