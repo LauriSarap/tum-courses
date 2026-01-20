@@ -8,6 +8,7 @@ int main()
 	// Bytes 0x01, 0x23, 0x45, ... jeweils in einer eigenen
 	// Zeile ausgeben, beginnend bei der Adresse l
 
-
-
+	for (int i = 0; i < sizeof(long); i++) {
+		printf("%#04x\n", *(((unsigned char*)(&l) + i)));
+	}
 }
