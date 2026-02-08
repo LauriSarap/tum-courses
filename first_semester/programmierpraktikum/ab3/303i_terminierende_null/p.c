@@ -9,7 +9,7 @@ int main(int argc, char * argv[])
 	scanf("%20s", eingabe);
 
 	printf("# ");
-	for(i = 0; i < 21; i++)
+	for(i = 0; i < eingabe[i]; i++)
 	{
 		printf(" %c ", eingabe[i]);
 	}
