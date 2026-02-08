@@ -17,9 +17,5 @@ int main() {
     printf("Size of char: %lu\n", sizeof(e));
     printf("Size of char array: %lu\n", sizeof(ee));
 
-    char answer[6];
-
-    scanf(answer);
-
     return 0;
 }
