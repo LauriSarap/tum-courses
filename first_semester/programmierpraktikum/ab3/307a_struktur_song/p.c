@@ -1,25 +1,23 @@
 #include <stdio.h>
 
 // Strukturdefinition
-
-
-
-
-
+typedef struct Song {
+	char name[20];
+	int duration;
+} Song;
 
 int main()
 {
-	// Deklaration
+	Song s;
 
 
-	// Name einlesen
+	printf("Name: ");
+	scanf("%s", s.name);
 
+	printf("Duration: ");
+	scanf("%i", &(s.duration));
 
-
-	// Dauer einlesen
-
-
-
-	// Song ausgeben in der Form "Name (Minuten:Sekunden)"
-
+	int minutes = s.duration / 60;
+	int seconds = s.duration % 60;
+	printf("%s (%02d:%02d)\n", s.name, minutes, seconds);
 }

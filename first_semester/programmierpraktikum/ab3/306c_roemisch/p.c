@@ -3,88 +3,82 @@
 
 int main()
 {
-
 	char rds[15];
-	int vs[15] = {0};
 	unsigned int sum = 0;
-	unsigned short l; 
-	
-	// Römische Zahl einlesen
+	int last_chunk = 4000;
+	char prev = '\0';
+	int repeat = 0;
+
 	printf("Römische Zahl: ");
-	scanf("%s", rds);
-
-	for (int i = 0; rds[i]; i++) {
-		rds[i] = toupper((unsigned char) rds[i]);
+	if (scanf("%14s", rds) != 1) {
+		return 0;
 	}
 
 	for (int i = 0; rds[i]; i++) {
-		if (i == 14) {
+		rds[i] = toupper((unsigned char)rds[i]);
+	}
 
-		} else if (rds[i+1] == 'M' && rds[i] == 'C') {
-			vs[i] = 900;
-			l++;
-			continue;
-		} else if (rds[i+1] == 'D' && rds[i] == 'C') {
-			vs[i] = 400;
-			l++;
-			continue;
-		} else if (rds[i+1] == 'C' && rds[i] == 'X') {
-			vs[i] = 90;
-			l++;
-			continue;
-		} else if (rds[i+1] == 'L' && rds[i] == 'X') {
-			vs[i] = 40;
-			l++;
-			continue;
-		} else if (rds[i+1] == 'X' && rds[i] == 'I') {
-			vs[i] = 9;
-			l++;
-			continue;
-		} else if (rds[i+1] == 'V' && rds[i] == 'I') {
-			vs[i] = 4;
-			l++;
-			continue;
-		}
+	for (int i = 0; rds[i]; ) {
+		int value = 0;
+		int next_value = 0;
 
-		if (i == 0) {
-
-		} else if (rds[i] == 'M' && rds[i-1] == 'C') {
-			continue;
-		} else if (rds[i] == 'D' && rds[i-1] == 'C') {
-			continue;
-		} else if (rds[i] == 'C' && rds[i-1] == 'X') {
-			continue;
-		} else if (rds[i] == 'L' && rds[i-1] == 'X') {
-			continue;
-		} else if (rds[i] == 'X' && rds[i-1] == 'I') {
-			continue;
-		} else if (rds[i] == 'V' && rds[i-1] == 'I') {
-			continue;
-		}
-
-		switch (rds[i]){
-			case ('M'): vs[i] = 1000;
-				break;
-			case ('D'): vs[i] = 500;
-				break;
-			case ('C'): vs[i] = 100;
-				break;
-			case ('L'): vs[i] = 50;
-				break;
-			case ('X'): vs[i] = 10;
-				break;
-			case ('V'): vs[i] = 5;
-				break;
-			case ('I'): vs[i] = 1;
-				break;
+		switch (rds[i]) {
+			case 'M': value = 1000; break;
+			case 'D': value = 500; break;
+			case 'C': value = 100; break;
+			case 'L': value = 50; break;
+			case 'X': value = 10; break;
+			case 'V': value = 5; break;
+			case 'I': value = 1; break;
 			default: return 0;
-				break;
 		}
-		l++;
-	}
 
-	for (int i = 0; i < l+1; i++) {
-		sum += vs[i];
+		if (rds[i] == prev) {
+			repeat++;
+			if (!(rds[i] == 'I' || rds[i] == 'X' || rds[i] == 'C' || rds[i] == 'M') || repeat > 4) {
+				return 0;
+			}
+		} else {
+			prev = rds[i];
+			repeat = 1;
+		}
+
+		if (rds[i + 1]) {
+			switch (rds[i + 1]) {
+				case 'M': next_value = 1000; break;
+				case 'D': next_value = 500; break;
+				case 'C': next_value = 100; break;
+				case 'L': next_value = 50; break;
+				case 'X': next_value = 10; break;
+				case 'V': next_value = 5; break;
+				case 'I': next_value = 1; break;
+				default: return 0;
+			}
+		}
+
+		if (next_value && value < next_value) {
+			if (!((rds[i] == 'I' && (rds[i + 1] == 'V' || rds[i + 1] == 'X')) ||
+				(rds[i] == 'X' && (rds[i + 1] == 'L' || rds[i + 1] == 'C')) ||
+				(rds[i] == 'C' && (rds[i + 1] == 'D' || rds[i + 1] == 'M'))) || repeat > 1) {
+				return 0;
+			}
+			if (next_value - value > last_chunk) {
+				return 0;
+			}
+			sum += next_value - value;
+			last_chunk = next_value - value;
+			prev = rds[i + 1];
+			repeat = 1;
+			i += 2;
+			continue;
+		}
+
+		if (value > last_chunk) {
+			return 0;
+		}
+		sum += value;
+		last_chunk = value;
+		i++;
 	}
 
 	printf("Der Wert ist %d.\n", sum);
