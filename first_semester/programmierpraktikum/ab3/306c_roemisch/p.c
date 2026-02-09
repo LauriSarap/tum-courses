@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 
 int main()
@@ -9,7 +10,12 @@ int main()
 	unsigned short l; 
 	
 	// Römische Zahl einlesen
+	printf("Römische Zahl: ");
 	scanf("%s", rds);
+
+	for (int i = 0; rds[i]; i++) {
+		rds[i] = toupper((unsigned char) rds[i]);
+	}
 
 	for (int i = 0; rds[i]; i++) {
 		if (i == 14) {
