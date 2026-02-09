@@ -1,41 +1,28 @@
 #include <stdio.h>
 
+void read(double vektor[3]) {
+	for (int i = 0; i < 3; i++) {
+		printf("Element %i: ", i+1);
+		scanf("%lf", &vektor[i]);
+	}
+	printf("\n");
+}
+
 int main()
 {
-	// Zwei dreidimensionale Vektoren mit Namen "vektor1"
-	// und "vektor2" anlegen; Typ: 64 Bit Gleitkommazahl
+	printf("Erster Vektor\n");
+	double vektor1[3];
+	read(vektor1);
 
+	printf("Zweiter Vektor\n");
+	double vektor2[3];
+	read(vektor2);
 
-	// Variable "i" als 32 Bit vorzeichenlose Fest-
-	// kommazahl anlegen um Vektoren zu indizieren
+	unsigned int i;
+	double sum = 0;
+	for (i = 0; i < 3; i++) {
+		sum += vektor1[i] * vektor2[i];
+	}
 
-
-	// Variable "sum" vom Typ "64 Bit Gleitkommazahl" deklarieren
-
-	
-	// Vektor 1 einlesen
-
-
-
-
-
-
-
-	// Vektor 2 einlesen
-
-
-
-
-
-
-
-	// Skalarprodukt berechnen
-
-
-
-
-	
-	// Ergebnis ausgeben
-
-
-}	// Ende main-Routine
+	printf("Das Skalarprodukt beträgt %.2lf.\n", sum);
+}
