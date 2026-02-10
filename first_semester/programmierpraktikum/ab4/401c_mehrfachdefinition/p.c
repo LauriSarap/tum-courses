@@ -1,9 +1,6 @@
 #include <stdio.h>
 
-int wert_verdoppeln(int a)
-{
-	return 2 * a;
-}
+int wert_verdoppeln(int a);
 
 int main()
 {

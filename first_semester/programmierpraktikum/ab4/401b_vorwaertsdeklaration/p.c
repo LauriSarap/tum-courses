@@ -4,7 +4,6 @@
 
 int wert_verdoppeln(int);
 
-
 int main()
 {
 	int wert;
