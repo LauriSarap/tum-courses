@@ -8,7 +8,7 @@ typedef struct Person
 
 int main()
 {
-	Person person = {0};
+	Person person = {"Max Mustermann", 15};
 
 	unsigned char* ptr = (unsigned char*)&person;
 
