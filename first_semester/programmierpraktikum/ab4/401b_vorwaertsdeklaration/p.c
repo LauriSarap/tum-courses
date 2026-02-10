@@ -2,6 +2,8 @@
 
 // Hier Vorwärts-Deklaration einfügen
 
+int wert_verdoppeln(int);
+
 
 int main()
 {
