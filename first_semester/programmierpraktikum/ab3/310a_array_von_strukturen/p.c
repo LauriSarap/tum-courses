@@ -9,28 +9,21 @@ typedef struct Song
 
 int main()
 {
-	// Deklarationen
 
+	Song s[100];
+	int i, l;
 
+	for (i = 0; i < 100; i++) {
+		printf("Name: ");
+		scanf("%s", s[i].name);
 
-	// Schleife zum Einlesen der Array-Elemente
+		printf("Duration: ");
+		scanf("%d", &(s[i].duration));
 
-	{
-		// Name einlesen
-
-
-
-		// Dauer einlesen
-
-
-
-		// Abbruch, wenn Dauer = 0 eingegeben wurde
-
+		if (s[i].duration == 0) break;
 	}
 
-	// Alle Songs ausgeben in der Form "Name (Minuten:Sekunden)"
-
-
-
-
+	for (l = 0; l < i; l++) {
+		printf("%s (%02d:%02d)\n", s[l].name, s[l].duration/60, s[l].duration%60);
+	}
 }
