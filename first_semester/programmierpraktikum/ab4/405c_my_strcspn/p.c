@@ -4,16 +4,13 @@
 int my_strcspn(const char *s1, const char *s2)
 {
 
-
-
-
-
-
-
-
-
-
-
+	int i = 0;
+	for (i = 0; s1[i]; i++) {
+		for (int j = 0; s2[j]; j++) {
+			if (s1[i] == s2[j]) return i;
+		}
+	}
+	return i;
 }
 
 

@@ -3,21 +3,16 @@
 
 int string_to_lowercase(char *s)
 {
+	int i, count = 0;
+	int differenz = 'a' - 'A';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	for (i = 0; s[i]; i++) {
+		if (s[i] >= 'A' && s[i] <= 'Z') {
+			s[i] += differenz;
+			count++;
+		}
+	}
+	return count;
 }
 
 int main()

@@ -5,16 +5,11 @@
 char *my_strcpy(char * restrict dst, const char * restrict src)
 {
 
+	for (int i = 0; src[i]; i++) {
+		dst[i] = src[i];
+	}
 
-
-
-
-
-
-
-
-
-
+	return dst;
 }
 
 
