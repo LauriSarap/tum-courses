@@ -1,21 +1,15 @@
 #include <stdio.h>
 
 // Makro wert_verdoppeln(x) mit _Generic-Ausdruck
+#define wert_verdoppeln(x) _Generic ((x), int: wert_werdoppeln_int, double: wert_werdoppeln_double )(x)
 
+int wert_werdoppeln_int(int x) {
+	return 2*x;
+}
 
-
-
-
-// Funktion zum Verdoppeln von Integer-Werten
-
-
-
-
-
-// Funktion zum Verdoppeln von Double-Werten
-
-
-
+double wert_werdoppeln_double(double x) {
+	return 2*x;
+}
 
 
 int main()
