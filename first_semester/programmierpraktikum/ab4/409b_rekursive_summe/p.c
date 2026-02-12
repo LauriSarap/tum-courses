@@ -3,8 +3,9 @@
 int rekursive_summe(int n)
 {
 
-
-
+	if (n == 0) return 0;
+	
+	return n + (rekursive_summe(n-1));
 }
 
 int main()

@@ -2,9 +2,8 @@
 
 void f(void)
 {
-
-
-
+	static int i = 0;
+	printf("Wert von i: %i\n", i++);
 }
 
 int main()

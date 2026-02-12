@@ -4,7 +4,9 @@
 int q_rekursiv(int n)
 {
 
+	if (n == 1 || n == 2) return 1;
 
+	return q_rekursiv(n - q_rekursiv(n-1)) + q_rekursiv(n - q_rekursiv(n-2));
 
 
 }

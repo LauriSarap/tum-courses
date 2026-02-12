@@ -3,18 +3,14 @@
 int rekursive_summe(int n, int **n0, int **nn)
 {
 
+	if (n == 0) {
+		*n0 = &n;
+		return n;
+	}
 
+	if (*nn == NULL) *nn = &n;
 
-
-
-
-
-
-
-
-
-
-
+	return n + rekursive_summe(n-1, n0, nn);
 }
 
 int main()

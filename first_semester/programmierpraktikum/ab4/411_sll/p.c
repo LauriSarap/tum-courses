@@ -21,39 +21,37 @@ void add_song_sorted_by_duration(struct Song *p)
 	struct Song *p2;
 
 	// Wenn die Liste leer ist
-
-
-
-
-
-
-
+	if (pFirst == NULL) {
+		pFirst = pLast = p;
+		p->pNext = NULL;
+		return;
+	}
 	// Liste ist nicht leer => In Schleife mit p2 die Liste durchlaufen
 
-	{
+	for (p2 = pFirst; p2; p2 = p2->pNext){
 		// Neues Element p vor dem ersten Element einfügen
 
-		{
-
-
-
+		if (p2 == pFirst && p->duration < p2->duration){
+			p -> pNext = pFirst;
+			pFirst = p;
+			break;
 		}
 
 		// Neues Element p irgendwo zwischen zwei Elementen einfügen
 
-		{
-
-
-
+		else if (p2->pNext && p->duration < p2->pNext->duration){
+			p-> pNext = p2->pNext;
+			p2 ->pNext = p;
+			break;
 		}
 
 		// Neues Element p am Schluss einfügen
 
-		{
-
-
-
-
+		else if (p2->pNext == NULL){
+			p2->pNext = p;
+			p->pNext = NULL;
+			pLast = p;
+			break;
 		}
 	} // Schleife
 }
@@ -65,25 +63,19 @@ struct Song* get_song()
 {
 	struct Song *p;
 
-	// Zur Laufzeit Speicher für einen Song allozieren und den Zeiger
-	// auf diesen Speicher der Variable p zuweisen
+	p = malloc(sizeof(struct Song));
+
+	if(p == NULL) return NULL;
 
 
-	// Aus Funktion get_song mit Rückgabewert NULL zurückspringen, 
-	// falls Speicher nicht zugewiesen werden konnte
-
-
-	printf("Name: ");
-	
-	// Name in die Variable "name" der allozierten Struktur einlesen
+	printf("Name: ");	
+	scanf("%s", p->name);
 
 	
 	printf("Dauer: ");
+	scanf("%d", &p->duration);
 
-	// Dauer in die Variable "duration" der allozierten Struktur einlesen
-
-
-	// Allozierten und eingelesenen Song zurückgeben
+	return p;
 
 }
 
@@ -91,36 +83,28 @@ struct Song* get_song()
 void add_song_at_the_end(struct Song *p)
 {
 	// Wenn die Liste leer ist
-
-
-
-
-
-
-	// Sonst, wenn die Liste nicht leer ist
-
-
-
-
-
+	if (pFirst == NULL) {
+		pFirst = pLast = p;
+		p-> pNext = NULL;
+	}
+	else {
+		pLast -> pNext = p;
+		p->pNext = NULL;
+		pLast = p;
+		
+	}
 
 }
 
 void add_song_at_the_beginning(struct Song *p)
 {
-	// Wenn die Liste leer ist
-
-
-
-
-
-
-	// Wenn die Liste nicht leer ist
-
-
-
-
-
+	if (pFirst == NULL) {
+		pFirst = pLast = p;
+		p-> pNext = NULL;
+	} else {
+		p-> pNext = pFirst;
+		pFirst = p;
+	}
 }
 
 void print_all_songs()
